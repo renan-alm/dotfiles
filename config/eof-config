@@ -1,0 +1,17 @@
+## Configs that must be declared in the end of the zshrc initialization
+
+# Makes ZSH not parse wildcards. 
+# So 'echo *' will not expand to files in the current directory. 
+# Neither '?' will be parsed as something else.
+# setopt noglob
+
+if [ -e /home/ralmeida/.nix-profile/etc/profile.d/nix.sh ]; then
+    . /home/ralmeida/.nix-profile/etc/profile.d/nix.sh
+fi
+
+# Added by github/training-manual class setup
+test -f "/Users/ralmeida/.trainingmanualrc" && source "/Users/ralmeida/.trainingmanualrc" || true
+
+# For Azure cli
+autoload bashcompinit && bashcompinit
+source $(brew --prefix)/etc/bash_completion.d/az

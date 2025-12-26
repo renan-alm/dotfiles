@@ -1,0 +1,59 @@
+## Aliases
+alias cleanbr='git branch -D $(git branch)'
+alias zshrc="vim ~/.zshrc"
+alias notes="code ~/code/_notes"
+alias kb="code ~/code/work/_SOLIDIFY/practices-knowledge-base"
+alias docs="cd ~/code/_docs"
+alias zalias="vim ~/code/_notes/config/renan-aliases"
+alias tf='terraform'
+alias zshalias="vim ~/code/_notes/config/renan-aliases"
+alias cheat='less ~/code/_notes/cheat_sheet.md'
+alias cheatlinux='less ~/code/_notes/cheat_linux.md'
+alias cheatlin='less ~/code/_notes/cheat_linux.md'
+alias cheattf='less ~/code/_notes/cheat_terraform.md'
+alias cheatk8s='less ~/code/_notes/cheat_k8s.md'
+alias linux='less ~/code/_notes/linux_sheet.md'
+alias omz="vim ~/.oh-my-zsh"
+alias ggr='git grep'
+alias ls='ls --color=auto' 
+alias master='git checkout master || git checkout main'
+alias main='git checkout main'
+alias k=kubectl
+alias mk='minikube kubectl'
+alias grep='grep --color' 
+alias rgrep='rgrep -n --color' 
+#alias diff='colordiff' 
+alias tff='terraform fmt -recursive'
+alias glog='git log --graph --all --pretty=oneline --abbrev-commit --topo-order'
+#alias python='python3'
+# alias ansible-playbook='ansible-playbook --extra-vars=@~/.ansible/defaults.json --extra-vars=@~/.keyvault.yml'
+alias pip='pip3'
+alias act='act --container-architecture linux/amd64'
+alias ghost='code /Users/ralmeida/Library/Application\ Support/com.mitchellh.ghostty/config'
+
+# DOCKER/PODMAN Aliases
+# -------------------------------------------------------
+
+if command -v scutil &> /dev/null; then
+    if [ "$(scutil --get LocalHostName)" != "Renans-MacBook-Pro" ]; then
+        alias docker='podman'
+    fi
+fi
+alias docker-run='docker run -it --rm -v "$PWD":/mnt'
+#docker run -v $(pwd):/root -it node /bin/bash
+alias docker-rmi='docker rmi $(docker images -q)'
+alias docker-prune='docker images prune --all'
+# docker exec -it container-name sh
+# docker exec -it gitlab editor /etc/gitlab/gitlab.rb # Edit files within container
+# docker build . -t docker.prod.nordnet.se/nordnet-images/nordnet-renovate-bot:latest
+# docker system prune --all --force --volulmes
+
+# For Docker towards Artifactory:
+# - User: your email address 
+# - Password: API token from Artifactory
+
+## Git Stuff
+git config --global column.ui auto
+git config --global branch.sort -committerdate
+git config --global format.pretty medium # or oneline
+git config --global format.graph "%C(auto)%h%d %s %Cgreen(%cr) %C(bold blue)<%an>%Creset"

@@ -35,11 +35,11 @@ export PATH=$PATH:~/Library/Python/3.9/bin
 
 #### Sourcing stuff #####
 echo 'Loading aliases ...'
-source ~/code/_notes/config/renan-aliases    # My aliases
+source ~/code/_notes/dotfiles/config/renan-aliases    # My aliases
 echo 'Loading env vars ...'
-source ~/code/_notes/config/renan-envvars    # My env vars
+source ~/code/_notes/dotfiles/config/renan-envvars    # My env vars
 echo 'Loading functions ...'
-source ~/code/_notes/config/renan-functions  # My bash functions
+source ~/code/_notes/dotfiles/config/renan-functions  # My bash functions
 
 echo 'Loading plugins ...'
 plugins=(
@@ -104,7 +104,7 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=off
 
 # echo 'Loading eof-configs ...'
 # Below is added from github/training-manual class setup
-source ~/code/_notes/config/eof-config    # My aliases
+source ~/code/_notes/dotfiles/config/eof-config    # My aliases
 # The following lines have been added by Docker Desktop to enable Docker CLI completions.
 fpath=(/Users/ralmeida/.docker/completions $fpath)
 autoload -Uz compinit

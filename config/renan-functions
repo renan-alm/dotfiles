@@ -1,0 +1,352 @@
+#!/bin/bash
+# -------------------------------------------------------
+
+function teach() {
+  echo Reaching scripts/teach-class at 'training-manual' repo ...
+  if [ ! -f /Users/ralmeida/code/work/training-manual/script/teach-class ]; then
+    echo "File not found! Setup 'training-manual' repo"
+    exit 1
+  fi
+  chmod +x /Users/ralmeida/code/work/training-manual/script/teach-class 
+  /Users/ralmeida/code/work/training-manual/script/teach-class
+}
+
+function alias-gl_exporter() {
+  echo 'Consider changing directory to the gl-exporter folder so env files are setup correctly'
+  alias gl_exporter='docker run -it -v $(pwd):/workspace --env-file $(pwd)/.env github/gl-exporter gl_exporter'
+  echo 'Samples:'
+  echo 'gl_exporter --only merge_requests -f export_list.csv -o migration_archive-runner.tar.gz'
+  echo ' gl_exporter -f export_list.csv -o migration_archive-runner.tar.gz'
+}
+
+function alias-gh-importer() {
+  alias ghec-importer='docker run -it --rm -v $(pwd):/root/ghec-importer ghec-tool:latest ghec-importer'
+  # ghec-importer import -a $GH_TOKEN -t 'SolidifyDemo' migration.tar.gz
+}
+ 
+function lint(){
+  echo 'Running github/super-linter ...'
+  docker run --rm --env-file .env -e RUN_LOCAL=true -v $PWD:/tmp/lint github/super-linter:latest
+}
+
+function lint-go(){
+  echo 'Running github/super-linter ...'
+  docker run --rm \
+    -e RUN_LOCAL=true \
+    -e RUN_LOCAL=true \
+    -e VALIDATE_GO=true \
+    -e VALIDATE_MARKDOWN=false \
+    -e VALIDATE_YAML=false \
+    -e VALIDATE_JSON=false \
+    -e VALIDATE_BASH=false \
+    -e VALIDATE_PYTHON=false \
+    -e VALIDATE_DOCKERFILE=false \
+    -v $PWD:/tmp/lint github/super-linter:latest
+}
+
+function help() {
+   echo These are my pre-configured bash functions: 
+   echo ++ use-ansible-container ansible-container
+   echo ++ setup-python python-container python-gitops-container
+   echo ++ agent
+   echo ++ git-ignore clone
+   echo ++ load-pass load-github load-jfrog load-sa
+   echo ++ work wcode code 
+   echo ++ gpg-encrypt add-alias
+   echo ++ setup-git setup-zsh
+}
+
+# ANSIBLE
+# -------------------------------------------------------
+
+function ansible-container() {
+  # Mount the local dir into the container and starts it from there.
+  echo 'You may first set the img using "use-ansible-container" and the aliases there to run this code (implicitly)'
+    docker run -it --rm \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      -v ~/.ssh/id_rsa:/home/jenkins/.ssh/id_rsa \
+      -v ~/.renan/vault_pass:/home/jenkins/.vault_pass.txt \
+      # -v ~/.ansible.cfg:/home/jenkins/.ansible.cfg \
+      -v ansible-container-cache:/home/jenkins/.ansible \
+      -w /home/jenkins/$(basename "$PWD") \
+      -v "$PWD":/home/jenkins/$(basename "$PWD") \
+      -e "VAULTPASS_TXT_PATH=/home/jenkins/.vault_pass.txt" \
+      -e "SSH_USER=$(whoami)" \
+      -e "SSH_KEY=/home/jenkins/.ssh/id_rsa" \
+      $ANSIBLE_IMAGE "$@"
+	
+      # To use: "ansible-container bash". After setting up the image using "use-ansible-container"
+}
+
+function use-ansible-container() {
+  # Creates aliases and a env-var for ANSIBLE IMAGE
+  # To use you may first set: "ANSIBLE_IMAGE=nordnet.jfrog.io/docker/nordnet-images/nordnet-ansible-agent:v551"
+    echo "Creating aliases for ansible ..."
+    ANSIBLE_IMAGE="${ANSIBLE_IMAGE:-nordnet.jfrog.io/docker/nordnet-images/nordnet-ansible-agent:v551}"
+    alias ansible='ansible-container ansible'
+    alias ansible-playbook="ansible-container ansible-playbook -u $(whoami)"
+    alias ansible-galaxy='ansible-container ansible-galaxy'
+    alias ansible-shell='ansible-container bash'
+    alias ansible-python='ansible-container python'
+}
+
+# PYTHON
+# -------------------------------------------------------
+
+function setup-python() {
+   python3 -m venv venv
+   source venv/bin/activate
+   python -m pip install --upgrade pip
+   rehash
+   if [ -f requirements.txt ]; then
+      pip install -r requirements.txt
+   else
+      echo 'INFO: No requirement files found!'
+   fi
+   unalias python
+   which python
+   #deactivate
+   #pycodestyle your_code.py
+}
+
+function python-container() {
+  version=$1
+   echo 'Starting Python container '
+   docker run -it --rm \
+   -v /var/run/docker.sock:/var/run/docker.sock \
+   -v "$PWD":/mnt \
+   -e "SSH_USER=$(whoami)" \
+   -w /mnt \
+   python:3.$version bash
+}
+
+function python-gitops-container() {
+   echo 'Starting Python 3.9 '
+   docker run -it --rm \
+   -v ~/.ssh/id_rsa:/root/.ssh/id_rsa \
+   -v /var/run/docker.sock:/var/run/docker.sock \
+   -v "$PWD":/mnt \
+   -e "SSH_USER=$(whoami)" \
+   -w /mnt \
+   docker.prod.nordnet.se/nordnet-images/nordnet-gitops-agent:v56 sh
+}
+
+# JENKINS
+# -------------------------------------------------------
+
+function run-jenkins() {
+  ## Based on https://www.jenkins.io/doc/book/installing/docker/
+  docker network create jenkins ||  true
+  docker run --name jenkins-docker --rm --detach \
+      --privileged --network jenkins --network-alias docker \
+      --env DOCKER_TLS_CERTDIR=/certs \
+      --volume jenkins-docker-certs:/certs/client \
+      --volume jenkins-data:/var/jenkins_home \
+      --publish 2376:2376 \
+      docker:dind --storage-driver overlay2
+  
+  docker build -t myjenkins-blueocean:2.504.2-1 ~/code/_notes/jenkins/
+
+  docker run \
+      --name jenkins-blueocean \
+      --restart=on-failure \
+      --detach \
+      --network jenkins \
+      --env DOCKER_HOST=tcp://docker:2376 \
+      --env DOCKER_CERT_PATH=/certs/client \
+      --env DOCKER_TLS_VERIFY=1 \
+      --publish 8080:8080 \
+      --publish 50000:50000 \
+      --volume jenkins-data:/var/jenkins_home \
+      --volume jenkins-docker-certs:/certs/client:ro \
+      myjenkins-blueocean:2.504.2-1
+}
+
+function agent(){
+    host=jenkins-agent$1.prod.nordnet.se
+	echo Attempting access to $host 
+	ssh $host
+}
+
+# GIT
+# -------------------------------------------------------
+
+function git-ignore(){
+  repo=$(basename $(pwd))
+  echo This must run on the root of $repo
+  echo "Adding $@ to $repo/.git/info/exclude"
+  #cat .git/info/
+  echo "$@" >> .git/info/exclude
+}
+
+funtion clone(){
+  link=$1
+  target='~/code/work'
+  echo "Cloning '"$link"' in '"$target"'" 
+  cd $target
+  git clone $link
+  if [ $? -eq 0 ]; then
+    echo "Clone successful"
+  else
+    echo "Clone failed: Verify if this project exists on NN GH"
+  fi
+}
+
+funtion clone-p(){
+  link=$1
+  echo "Cloning using personal SSH key ..."
+  cd ~/code/work
+  git clone $(echo $1 | sed 's/github.com/private/')
+  if [ $? -eq 0 ]; then
+    echo "Clone successful"
+  else
+    echo "Clone failed: Verify if this project exists on NN GH"
+  fi
+}
+
+
+# LOAD pwds
+# -------------------------------------------------------
+function load-github(){
+  export GITHUB_TOKEN=$(cat ~/.renan/github_token)
+  export GH_TOKEN=$GITHUB_TOKEN
+  echo $GITHUB_TOKEN | pbcopy
+  echo 'Token has been copied to clipboard. Use echo $GITHUB_TOKEN to see the token'
+}
+function load-gitlab(){
+  export GITLAB_TOKEN=$(cat ~/.renan/gitlab_token)
+  echo $GITLAB_TOKEN | pbcopy
+  echo 'Token has been copied to clipboard. Use echo $GITLAB_TOKEN to see the token'
+}
+function load-ghapp(){
+  export GHAPP_KEY=$(cat ~/.renan/ghapp_key_file)
+  echo $GHAPP_KEY | pbcopy
+  echo 'Key has been copied to clipboard. Use echo $GHAPP_KEY to see the key'
+}
+
+function load-jfrog(){
+  export JFROG_ACCESS_TOKEN=$(cat ~/.renan/jfrog_token)
+  echo $JFROG_ACCESS_TOKEN | pbcopy
+  echo 'Token has been copied to clipboard. Use echo $JFROG_ACCESS_TOKEN to see the token'
+}
+function load-sa(){
+  pwd=$(pwd)
+  service_account=$1 
+  cd ~/.renan
+  if [ $# -eq 0 ]; then
+    service_account="gcp"
+  fi
+  temp=$(ls -d $service_account*|head -1)
+  export GOOGLE_APPLICATION_CREDENTIALS=$(cat $temp)
+  echo $GOOGLE_APPLICATION_CREDENTIALS | pbcopy
+  echo "> Loading SA keys for $temp"
+  echo 'Key has been copied to clipboard. Use echo $GOOGLE_APPLICATION_CREDENTIALS to see the key'
+  cd $pwd
+}
+
+function get-az-secret(){
+  # Assuming that az login is complete and jq is installed
+  secret_name=$1
+  az keyvault secret show --name "$secret_name" --vault-name kv-prod-cdc-pipeline-euw | jq .value
+}
+
+function get-az-storage-acc(){
+  # Assuming that az login is complete
+  az storage account list --query "[].name"
+}
+
+function search-az-secret(){
+  # Assuming that az login is complete and jq is installed
+  secret_name=$1
+  az keyvault secret list --vault-name kv-prod-cdc-pipeline-euw --query "[].name" | grep -e "$secret_name"
+}
+
+function ldap-ica-search(){
+  user=$1
+  account=$2
+  echo "The below may work better at a ICA VM"
+  echo ldapsearch -LLL -H ldaps://ldap.ica.ia-hc.net -D "ICA\\$user " -W -b 'DC=ica,DC=ia-hc,DC=net'  samAccountName=$account
+}
+
+function gh-login(){
+  # Ensure gh cli is installed and configured
+  command -v gh &> /dev/null || { echo "GitHub CLI (gh) is not installed. Install with: brew install gh"; exit 1; }
+  export GITHUB_TOKEN=$(cat ~/.renan/github_token)
+  gh auth login --with-token <<< $GITHUB_TOKEN
+  echo 'GitHub CLI is now authenticated with your token.'
+}
+
+
+# UTIL
+# -------------------------------------------------------
+
+function work(){
+  repo=$1
+  mkdir -p ~/code/work/
+  dir="~/code/work/$repo"
+  cd $dir &>0 || cd ~/code/work && echo 'cd ... /code/work'
+}
+
+function demo(){
+  code ~/code/work/my-demos
+}
+
+function code() {
+   open -a Visual\ Studio\ Code.app $1
+}
+
+funtion wcode(){
+  repo=$1
+  dir="~/code/work/work/$repo"
+  pwd=$(pwd)
+
+  if [ $# -eq 0 ]; then
+    echo 'Opening Notes'
+    code ~/code/_notes
+  else
+    if [ -d "$dir" -a ! -h "$dir" ]; 
+    then
+      echo "Opening $dir ..."
+      code $dir
+    else
+      echo "Repo '$repo' not found under /code/work"
+      clone $repo
+      wcode $repo
+    fi
+  fi
+  cd $pwd
+}
+
+function gpg-encrypt() {
+    # After having the Jenkins pubkey imported
+    # gpg --list-keys
+    # curl -s 'https://scm.prod.nordnet.se/projects/CD/repos/nordnet-jenkins-master/raw/jenkins.gpg' | gpg --import
+    # OR if you want to use a file gpg -ear Jenkins -o secret-file.gpg secret-file
+    echo -n 'Enter secret: ' ; read -s secret; echo ; echo -n $secret | gpg -ear Jenkins
+}
+
+function add-alias() {
+  last_command=$(echo `history | tail -n1` | sed 's/[0-9]* //')
+  echo alias $1="'""$last_command""'" >> ~/.zshrc
+  . ~/.zshrc
+}
+
+# SETUP FUNCTIONS
+# -------------------------------------------------------
+
+function setup-git(){
+  if [ ! -f "~/.gitignore_global" ]; 
+    then
+      echo "Creating .gitignore_global ..."
+      touch ~/.gitignore_global
+      echo "Creating symlink to from .gitconfig to .my_git_config"
+      ln -s ~/code/_notes/.my_gitconfig /Users/qkg167/.gitconfig
+  else
+      echo "Creating symlink to from .gitconfig to .my_git_config"
+      ln -s ~/code/_notes/.my_gitconfig /Users/qkg167/.gitconfig
+  fi
+}
+
+function setup-zsh(){
+  ln -s ~/code/_notes/.my_zshrc .zshrc
+}
