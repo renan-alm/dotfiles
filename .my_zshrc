@@ -1,0 +1,114 @@
+# Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
+# Initialization code that may require console input (password prompts, [y/n]
+# confirmations, etc.) must go above this block; everything else may go below.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# Symlink to this config
+# ln -s code/_notes/dotfiles/.my_zshrc /Users/ralmeida/.zshrc
+## OR
+# ln -s code/_notes/.my_zshrc ~/.zsh
+# echo "source ~/.zshrc" > .zprofile
+
+# ln -s code/_notes/.my_gitconfig ~/.gitconfig
+
+# Config for Kubectl completion
+autoload -Uz compinit
+compinit
+source <(kubectl completion zsh)
+
+# Path to your oh-my-zsh installation.
+export ZSH=$HOME/.oh-my-zsh
+export PATH="$HOME/bin:$PATH"
+PATH="/opt/homebrew/opt/gawk/libexec/gnubin:$PATH"
+PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
+PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"
+PATH="/opt/homebrew/opt/grep/libexec/gnubin:$PATH"
+PATH="/opt/homebrew/opt/make/libexec/gnubin:$PATH"
+export GIT_SSH_COMMAND="ssh" # ssh -v # if you want ssh to be verbose
+export INSTALL_ONCE=1
+
+# Python into my PATH
+export PATH=$PATH:~/Library/Python/3.9/bin
+
+
+#### Sourcing stuff #####
+echo 'Loading aliases ...'
+source ~/code/_notes/config/renan-aliases    # My aliases
+echo 'Loading env vars ...'
+source ~/code/_notes/config/renan-envvars    # My env vars
+echo 'Loading functions ...'
+source ~/code/_notes/config/renan-functions  # My bash functions
+
+echo 'Loading plugins ...'
+plugins=(
+  git
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+  fzf
+  asdf
+  battery
+)
+#### End of Sourcing stuff #####
+
+# Install Powerlevel10k
+## 1: Install fonts
+##### https://github.com/romkatv/powerlevel10k#meslo-nerd-font-patched-for-powerlevel10k
+## 2: Install Powerlevel10k
+##### brew install powerlevel10k
+## 3: Source the below
+source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme
+
+## ASDF configuration
+# source "$HOME/.asdf/asdf.sh"
+# # Completions to fpath
+# fpath=(${ASDF_DIR}/completions $fpath)
+# # initialise completions with ZSH's compinit
+# autoload -Uz compinit && compinit
+# export PATH="$HOME/bin/linux_amd64:$PATH"
+
+## Themes https://github.com/ohmyzsh/ohmyzsh/wiki/themes
+ZSH_THEME="clean"
+# ZSH_THEME="awesomepanda"
+zstyle ':omz:update' mode auto      # update automatically without asking
+
+# # FZF SETUP
+# set rtp+=/home/linuxbrew/.linuxbrew/opt/fzf
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# export FZF_DEFAULT_COMMAND="find ~+ -type f"
+# export FZF_DEFAULT_OPTS="--height=40% --layout=reverse --info=inline --preview 'cat {}' --border --margin=1 --padding=1"
+# export FZF_ALT_C_OPTS="--preview 'tree -C {}'"
+
+# export FZF_CTRL_R_OPTS="
+#   --preview 'echo {}' --preview-window up:3:hidden:wrap
+#   --bind 'ctrl-/:toggle-preview'
+#   --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
+#   --color header:italic
+#   --header 'Press CTRL-Y to copy command into clipboard'"
+
+
+# export NVM_DIR="$HOME/.nvm"
+# [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+# [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+
+### Brew config ###
+eval "$(/opt/homebrew/bin/brew shellenv)" source $ZSH/oh-my-zsh.sh
+
+# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
+echo 'Loading Powerlevel10k ...'
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+typeset -g POWERLEVEL9K_INSTANT_PROMPT=off
+
+# echo 'Loading eof-configs ...'
+# Below is added from github/training-manual class setup
+source ~/code/_notes/config/eof-config    # My aliases
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/ralmeida/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+# End of Docker CLI completions
+# added by github/training-manual class setup
+test -f "/Users/ralmeida/.trainingmanualrc" && source "/Users/ralmeida/.trainingmanualrc"
