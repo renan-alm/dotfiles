@@ -36,20 +36,6 @@ export ANSIBLE_CONFIG=~/.ansible.cfg
 #export SRC_ENDPOINT=https://service-sourcegraph-poc1.test.nordnet.se
 #export SRC_ACCESS_TOKEN=a42351f2150da3f9bf795f0aa6b538aa4580113a
 
-
-# GITHUB
-# -------------------------------------------------------
-# export GH_TOKEN=$(cat ${renan_vault}/github_token)
-# export GH_TOKEN=$(cat /Users/ralmeida/.renan/github_token)
-# export GH_PAT=GH_TOKEN
-# unset GH_TOKEN 
-export GITHUB_USER=$(cat ${renan_vault}/github_user)
-export GITHUB_PASSWORD=$(cat ${renan_vault}/github_password)
-
-
-# GITLAB SELF-HOSTED
-export GITLAB_TOKEN=$(cat ${renan_vault}/gitlab_token)
-
 # VAULT
 # -------------------------------------------------------
 #export VPASS=$(cat ~/.renan/vault_pass)

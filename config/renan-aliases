@@ -15,6 +15,7 @@ alias cheatk8s='less ~/code/_notes/cheat_k8s.md'
 alias linux='less ~/code/_notes/linux_sheet.md'
 alias omz="vim ~/.oh-my-zsh"
 alias ggr='git grep'
+alias gsub='git submodule status'
 alias ls='ls --color=auto' 
 alias master='git checkout master || git checkout main'
 alias main='git checkout main'
