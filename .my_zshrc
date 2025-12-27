@@ -5,14 +5,6 @@ if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
 
-# Symlink to this config
-# ln -s code/_notes/dotfiles/.my_zshrc /Users/ralmeida/.zshrc
-## OR
-# ln -s code/_notes/.my_zshrc ~/.zsh
-# echo "source ~/.zshrc" > .zprofile
-
-# ln -s code/_notes/.my_gitconfig ~/.gitconfig
-
 # Config for Kubectl completion
 autoload -Uz compinit
 compinit
@@ -21,11 +13,11 @@ source <(kubectl completion zsh)
 # Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 export PATH="$HOME/bin:$PATH"
-PATH="/opt/homebrew/opt/gawk/libexec/gnubin:$PATH"
-PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"
-PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"
-PATH="/opt/homebrew/opt/grep/libexec/gnubin:$PATH"
-PATH="/opt/homebrew/opt/make/libexec/gnubin:$PATH"
+PATH="/opt/homebrew/opt/gawk/libexec/gnubin:$PATH"      # brew install gawk
+PATH="/opt/homebrew/opt/gnu-sed/libexec/gnubin:$PATH"   # brew install gnu-sed
+PATH="/opt/homebrew/opt/gnu-tar/libexec/gnubin:$PATH"   # brew install gnu-tar
+PATH="/opt/homebrew/opt/grep/libexec/gnubin:$PATH".     # brew install grep
+PATH="/opt/homebrew/opt/make/libexec/gnubin:$PATH"      # brew install make
 export GIT_SSH_COMMAND="ssh" # ssh -v # if you want ssh to be verbose
 export INSTALL_ONCE=1
 
