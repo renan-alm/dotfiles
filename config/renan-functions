@@ -340,10 +340,10 @@ function setup-git(){
       echo "Creating .gitignore_global ..."
       touch ~/.gitignore_global
       echo "Creating symlink to from .gitconfig to .my_git_config"
-      ln -s ~/code/_notes/.my_gitconfig /Users/qkg167/.gitconfig
+      ln -s ~/code/_notes/.gitconfig /Users/$(whoami)/.gitconfig
   else
       echo "Creating symlink to from .gitconfig to .my_git_config"
-      ln -s ~/code/_notes/.my_gitconfig /Users/qkg167/.gitconfig
+      ln -s ~/code/_notes/.gitconfig /Users/$(whoami)/.gitconfig
   fi
 }
 
