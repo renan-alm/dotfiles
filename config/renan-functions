@@ -280,13 +280,6 @@ function gh-login(){
 # UTIL
 # -------------------------------------------------------
 
-function work(){
-  repo=$1
-  mkdir -p ~/code/work/
-  dir="~/code/work/$repo"
-  cd $dir &>0 || cd ~/code/work && echo 'cd ... /code/work'
-}
-
 function demo(){
   code ~/code/work/my-demos
 }

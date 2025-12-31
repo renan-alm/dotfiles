@@ -1,4 +1,8 @@
 ## Aliases
+alias work='cd ~/code/work'
+alias renan='cd ~/code/work/_RENAN'
+alias solid='cd ~/code/work/_SOLIDIFY'
+alias customers='cd ~/code/work/_CUSTOMERS'
 alias cleanbr='git branch -D $(git branch)'
 alias zshrc="vim ~/.zshrc"
 alias notes="code ~/code/_notes"
