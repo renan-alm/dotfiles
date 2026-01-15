@@ -104,3 +104,6 @@ compinit
 # End of Docker CLI completions
 # added by github/training-manual class setup
 test -f "/Users/ralmeida/.trainingmanualrc" && source "/Users/ralmeida/.trainingmanualrc"
+
+# add Pulumi to the PATH
+export PATH=$PATH:/Users/ralmeida/.pulumi/bin
