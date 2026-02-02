@@ -94,15 +94,19 @@ function use-ansible-container() {
 # -------------------------------------------------------
 
 function setup-python() {
+  # setup-python python3.9 # Override with specific version
+  local PYTHON_BIN="${1:-python3.12}"  # Default to python3.12
+
   rm -rf venv
-  python3 -m venv venv
+  $PYTHON_BIN -m venv venv
   source venv/bin/activate
   python -m pip install --upgrade pip
-   if [ -f requirements.txt ]; then
-      pip install -r requirements.txt
-   else
-      echo 'INFO: No requirement files found!'
-   fi
+  if [ -f requirements.txt ]; then
+    pip install -r requirements.txt
+  else
+    echo 'INFO: No requirement files found!'
+  fi
+
    # unalias python
    # which python
    #deactivate
