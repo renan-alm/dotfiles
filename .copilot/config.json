@@ -6,6 +6,11 @@
   "trusted_folders": [
     "/Users/ralmeida/code/work/_RENAN/gh-secrets-migrator",
     "/Users/ralmeida/code/work/_RENAN/merge-gatekeeper",
-    "/Users/ralmeida/code/work/my-demos"
-  ]
+    "/Users/ralmeida/code/work/my-demos",
+    "/Users/ralmeida/code/_notes/dotfiles"
+  ],
+  "asked_setup_terminals": [
+    "vscode"
+  ],
+  "model": "gemini-3-pro-preview"
 }

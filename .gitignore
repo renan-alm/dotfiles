@@ -1,2 +1,3 @@
 .copilot/logs**
 .copilot/session-state**
+.copilot/pkg**
