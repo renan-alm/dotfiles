@@ -2,49 +2,21 @@
 name: shell-coding
 description: Guidance for writing and debugging shell scripts (Bash/Zsh). Use this when asked to create or fix shell scripts, automate tasks, or manage system configurations via shell commands.
 ---
-# PDF Data Extraction
+# Shell Coding Skill and Rules
 
-Use `pdfplumber` for extracting text and tables from PDF documents.
+## Overall rules
 
-## Extract Text
+Always start with `set -euo pipefail` - Exit on errors (`-e`), undefined variables (`-u`), and pipeline failures (`-o pipefail`) to catch bugs early.
 
-```python
-import pdfplumber
+Quote all variables - Use `"$var"` instead of `$var` to prevent word splitting and glob expansion issues with spaces or special characters.
 
-with pdfplumber.open("document.pdf") as pdf:
-    for page in pdf.pages:
-        text = page.extract_text()
-        print(text)
-```
+Use `[[ ]]` instead of `[ ]` - Double brackets provide safer string comparisons, support regex, and avoid pitfalls with empty variables.
 
-## Extract Tables
+## Input validation
 
-```python
-with pdfplumber.open("document.pdf") as pdf:
-    for i, page in enumerate(pdf.pages):
-        tables = page.extract_tables()
-        for j, table in enumerate(tables):
-            print(f"Table {j+1} on page {i+1}:")
-            for row in table:
-                print(row)
-```
+Check that required arguments exist and commands are available before proceeding (e.g., `command -v jq >/dev/null || { echo "jq required"; exit 1; }`).
 
-## Advanced Table Extraction
+## Function creations
 
-```python
-import pandas as pd
+Organize code into functions with descriptive names to improve readability and maintainability.
 
-with pdfplumber.open("document.pdf") as pdf:
-    all_tables = []
-    for page in pdf.pages:
-        tables = page.extract_tables()
-        for table in tables:
-            df = pd.DataFrame(table[1:], columns=table[0])
-            all_tables.append(df)
-```
-
-## Installation
-
-```bash
-pip install pdfplumber pandas
-```
