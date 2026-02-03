@@ -251,7 +251,7 @@ function load-sa(){
 function get-az-secret(){
   # Assuming that az login is complete and jq is installed
   secret_name=$1
-  az keyvault secret show --name "$secret_name" --vault-name kv-prod-cdc-pipeline-euw | jq .value
+  az keyvault secret show --name "$secret_name" --vault-name kv-name-in-az | jq .value
 }
 
 function get-az-storage-acc(){
@@ -262,14 +262,14 @@ function get-az-storage-acc(){
 function search-az-secret(){
   # Assuming that az login is complete and jq is installed
   secret_name=$1
-  az keyvault secret list --vault-name kv-prod-cdc-pipeline-euw --query "[].name" | grep -e "$secret_name"
+  az keyvault secret list --vault-name kv-name-in-az --query "[].name" | grep -e "$secret_name"
 }
 
-function ldap-ica-search(){
+function ldap-search(){
   user=$1
   account=$2
-  echo "The below may work better at a ICA VM"
-  echo ldapsearch -LLL -H ldaps://ldap.ica.ia-hc.net -D "ICA\\$user " -W -b 'DC=ica,DC=ia-hc,DC=net'  samAccountName=$account
+  echo "The below may work better at a Company VM"
+  echo ldapsearch -LLL -H ldaps://ldap.<domain> -D "Company\\$user " -W -b 'DC=...,DC=...,DC=...'  samAccountName=$account
 }
 
 function gh-login(){
@@ -317,7 +317,7 @@ funtion wcode(){
 function gpg-encrypt() {
     # After having the Jenkins pubkey imported
     # gpg --list-keys
-    # curl -s 'https://scm.prod.nordnet.se/projects/CD/repos/nordnet-jenkins-master/raw/jenkins.gpg' | gpg --import
+    # curl -s '<Jenkins-instance>/raw/jenkins.gpg' | gpg --import
     # OR if you want to use a file gpg -ear Jenkins -o secret-file.gpg secret-file
     echo -n 'Enter secret: ' ; read -s secret; echo ; echo -n $secret | gpg -ear Jenkins
 }
@@ -345,5 +345,9 @@ function setup-git(){
 }
 
 function setup-zsh(){
-  ln -s ~/code/_notes/.my_zshrc .zshrc
+  ln -s ~/code/_notes/.my_zshrc ~/.zshrc
+}
+
+function setup-copilot(){
+  ln -s /Users/ralmeida/code/_notes/dotfiles/.copilot ~/.copilot
 }

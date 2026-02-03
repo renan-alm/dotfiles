@@ -1,0 +1,11 @@
+{
+  "banner": "always",
+  "render_markdown": true,
+  "screen_reader": false,
+  "theme": "auto",
+  "trusted_folders": [
+    "/Users/ralmeida/code/work/_RENAN/gh-secrets-migrator",
+    "/Users/ralmeida/code/work/_RENAN/merge-gatekeeper",
+    "/Users/ralmeida/code/work/my-demos"
+  ]
+}

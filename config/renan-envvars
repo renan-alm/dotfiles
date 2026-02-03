@@ -8,7 +8,6 @@ export PATH="$HOME/.local/bin:${PATH}"
 export PATH="$PATH:$(brew --prefix)/opt/coreutils/libexec/gnubin"
 export PATH="$PATH:/usr/local/opt/gsed/libexec/gnubin"
 export PATH="/usr/local/opt/gnu-sed/libexec/gnubin:$PATH"
-#export PATH="${PATH}:${HOME}/.krew/bin"
 export PATH="/usr/local/bin/code:$PATH"
 export TF_PLUGIN_CACHE_DIR="$HOME/.terraform.d/plugin-cache"
 export PATH=$PATH:$HOME/go/bin
@@ -33,14 +32,7 @@ export ANSIBLE_CONFIG=~/.ansible.cfg
 
 # SOURCEGRAPH
 # -------------------------------------------------------
-#export SRC_ENDPOINT=https://service-sourcegraph-poc1.test.nordnet.se
-#export SRC_ACCESS_TOKEN=a42351f2150da3f9bf795f0aa6b538aa4580113a
+#export SRC_ENDPOINT=
+#export SRC_ACCESS_TOKEN=
 
-# VAULT
-# -------------------------------------------------------
-#export VPASS=$(cat ~/.renan/vault_pass)
-
-#export JAVA_HOME="/Users/renalm/.sdkman/candidates/java/current"
-
-#export PATH="$HOME/.jenv/bin:$PATH"
 #eval "$(jenv init -)"

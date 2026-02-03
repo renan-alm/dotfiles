@@ -39,27 +39,7 @@ alias ghost='code /Users/ralmeida/Library/Application\ Support/com.mitchellh.gho
 
 # DOCKER/PODMAN Aliases
 # -------------------------------------------------------
-
-if command -v scutil &> /dev/null; then
-    if [ "$(scutil --get LocalHostName)" != "Renans-MacBook-Pro" ]; then
-        alias docker='podman'
-    fi
-fi
 alias docker-run='docker run -it --rm -v "$PWD":/mnt'
 #docker run -v $(pwd):/root -it node /bin/bash
 alias docker-rmi='docker rmi $(docker images -q)'
 alias docker-prune='docker images prune --all'
-# docker exec -it container-name sh
-# docker exec -it gitlab editor /etc/gitlab/gitlab.rb # Edit files within container
-# docker build . -t docker.prod.nordnet.se/nordnet-images/nordnet-renovate-bot:latest
-# docker system prune --all --force --volulmes
-
-# For Docker towards Artifactory:
-# - User: your email address 
-# - Password: API token from Artifactory
-
-## Git Stuff
-git config --global column.ui auto
-git config --global branch.sort -committerdate
-git config --global format.pretty medium # or oneline
-git config --global format.graph "%C(auto)%h%d %s %Cgreen(%cr) %C(bold blue)<%an>%Creset"

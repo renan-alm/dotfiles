@@ -5,10 +5,6 @@
 # Neither '?' will be parsed as something else.
 # setopt noglob
 
-if [ -e /home/ralmeida/.nix-profile/etc/profile.d/nix.sh ]; then
-    . /home/ralmeida/.nix-profile/etc/profile.d/nix.sh
-fi
-
 # Added by github/training-manual class setup
 test -f "/Users/ralmeida/.trainingmanualrc" && source "/Users/ralmeida/.trainingmanualrc" || true
 
