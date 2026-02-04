@@ -1,10 +1,16 @@
 {
   "commandHistory": [
+    "Can you see this #https://docs.github.com/en/rest/gitignore/gitignore?apiVersion=2022-11-28#get-all-gitignore-templates",
+    "/model",
+    "/skills add /Users/ralmeida/.copilot/skills/python-scripting/SKILL.md",
+    "/skills info python-scripting",
+    "/skills list",
+    "/skills add .copilot/skills/python-scripting/",
+    "/skills add .copilot/skills/python-scripting/",
+    "/skills add .copilot/python-scripting",
     "/skills info pdf-extractor",
     "/skills info",
     "/skills info pdf",
-    "/skills list",
-    "/model",
     "/skills",
     "What is this project about",
     "What's this project about? Do I have risks and vulnerabilities when this code is used communicating to the outside or third parties?",
