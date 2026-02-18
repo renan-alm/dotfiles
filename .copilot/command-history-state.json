@@ -1,19 +1,24 @@
 {
   "commandHistory": [
+    "/skills list",
+    "/skills reload pdf-extractor",
+    "/skills info pdf-extractor",
+    "what is this project about",
+    "/skills add test",
+    "/login",
+    "wjat is this project about",
+    "/plan how can I organize better the structure of this repo",
     "Can you see this #https://docs.github.com/en/rest/gitignore/gitignore?apiVersion=2022-11-28#get-all-gitignore-templates",
     "/model",
     "/skills add /Users/ralmeida/.copilot/skills/python-scripting/SKILL.md",
     "/skills info python-scripting",
-    "/skills list",
     "/skills add .copilot/skills/python-scripting/",
     "/skills add .copilot/skills/python-scripting/",
     "/skills add .copilot/python-scripting",
-    "/skills info pdf-extractor",
     "/skills info",
     "/skills info pdf",
     "/skills",
     "What is this project about",
-    "What's this project about? Do I have risks and vulnerabilities when this code is used communicating to the outside or third parties?",
-    "/login"
+    "What's this project about? Do I have risks and vulnerabilities when this code is used communicating to the outside or third parties?"
   ]
 }
