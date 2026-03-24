@@ -20,6 +20,7 @@ alias linux='less ~/code/_notes/linux_sheet.md'
 alias omz="vim ~/.oh-my-zsh"
 alias ggr='git grep'
 alias gsub='git submodule status'
+alias gpsub='git push --recurse-submodules=on-demand'
 alias ls='ls --color=auto' 
 alias master='git checkout master || git checkout main'
 alias main='git checkout main'
