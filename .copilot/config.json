@@ -1,8 +1,6 @@
+// User settings belong in settings.json.
+// This file is managed automatically.
 {
-  "banner": "always",
-  "render_markdown": true,
-  "screen_reader": false,
-  "theme": "auto",
   "trusted_folders": [
     "/Users/ralmeida/code/work/_RENAN/gh-secrets-migrator",
     "/Users/ralmeida/code/work/_RENAN/merge-gatekeeper",
@@ -11,10 +9,6 @@
   ],
   "asked_setup_terminals": [
     "vscode"
-  ],
-  "skill_directories": [
-    "/Users/ralmeida/code/_notes/dotfiles/.copilot/skills/python-scripting",
-    "/Users/ralmeida/.copilot/skills/python-scripting/SKILL.md"
   ],
   "firstLaunchAt": "2026-03-11T00:00:00.000Z"
 }

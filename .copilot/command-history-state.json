@@ -1,5 +1,14 @@
 {
   "commandHistory": [
+    "Does this extension allow --target-endpoint so the user can apply this to GitHub Data Residency?",
+    "/model",
+    ":q",
+    "/update",
+    "/yolo",
+    "/experimental on",
+    "/models",
+    "/model auto",
+    "how to verify a version of a github cli extension",
     "/skills list",
     "what is tjhis project anbpupt",
     "/skills reload pdf-extractor",
@@ -10,7 +19,6 @@
     "wjat is this project about",
     "/plan how can I organize better the structure of this repo",
     "Can you see this #https://docs.github.com/en/rest/gitignore/gitignore?apiVersion=2022-11-28#get-all-gitignore-templates",
-    "/model",
     "/skills add /Users/ralmeida/.copilot/skills/python-scripting/SKILL.md",
     "/skills info python-scripting",
     "/skills add .copilot/skills/python-scripting/",
