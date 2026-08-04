@@ -60,9 +60,7 @@ source $(brew --prefix)/share/powerlevel10k/powerlevel10k.zsh-theme
 # autoload -Uz compinit && compinit
 # export PATH="$HOME/bin/linux_amd64:$PATH"
 
-## Themes https://github.com/ohmyzsh/ohmyzsh/wiki/themes
-ZSH_THEME="clean"
-# ZSH_THEME="awesomepanda"
+ZSH_THEME=""powerlevel10k/powerlevel10k""
 zstyle ':omz:update' mode auto      # update automatically without asking
 
 # # FZF SETUP
