@@ -288,9 +288,6 @@ function demo(){
   code ~/code/work/my-demos
 }
 
-function code() {
-   open -a Visual\ Studio\ Code.app $1
-}
 
 funtion wcode(){
   repo=$1

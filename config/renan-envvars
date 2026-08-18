@@ -16,6 +16,10 @@ export GITLAB_HOME=/Users/ralmeida/code/work/my-gitlab/srv/gitlab
 
 export renan_vault=~/.renan
 
+# GH CLI
+export EDITOR=vim
+export GH_EDITOR=vim
+
 # ANSIBLE
 # -------------------------------------------------------
 #export DEFAULT_VAULT_PASSWORD_FILE=$(cat ${renan_vault}/ansible-renan-token)
