@@ -42,7 +42,6 @@ alias glog='git log --graph --all --pretty=oneline --abbrev-commit --topo-order'
 # alias ansible-playbook='ansible-playbook --extra-vars=@~/.ansible/defaults.json --extra-vars=@~/.keyvault.yml'
 alias pip='pip3'
 alias act='act --container-architecture linux/amd64'
-alias kubectl="minikube kubectl --"
 alias ghost='code /Users/ralmeida/Library/Application\ Support/com.mitchellh.ghostty/config'
 
 # DOCKER/PODMAN Aliases
