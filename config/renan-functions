@@ -183,7 +183,7 @@ function git-ignore(){
   echo "$@" >> .git/info/exclude
 }
 
-funtion clone(){
+function clone(){
   link=$1
   target='~/code/work'
   echo "Cloning '"$link"' in '"$target"'" 
@@ -196,7 +196,7 @@ funtion clone(){
   fi
 }
 
-funtion clone-p(){
+function clone-p(){
   link=$1
   echo "Cloning using personal SSH key ..."
   cd ~/code/work
@@ -347,4 +347,19 @@ function setup-zsh(){
 
 function setup-copilot(){
   ln -s /Users/ralmeida/code/_notes/dotfiles/.copilot ~/.copilot
+}
+
+function test-renovate(){
+  repo=$1
+  if [ -z "$repo" ]; then
+    echo 'Usage: test-renovate <owner/repository>'
+    return 1
+  fi
+  load-github
+  RENOVATE_TOKEN=$GITHUB_TOKEN \
+  RENOVATE_CONFIG_FILE=/tmp/renovate-test-global.json5 \
+  RENOVATE_DRY_RUN=full \
+  RENOVATE_PRINT_CONFIG=true \
+  LOG_LEVEL=debug \
+  npx --yes renovate "$repo"
 }
