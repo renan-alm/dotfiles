@@ -30,6 +30,11 @@ export ANSIBLE_CONFIG=~/.ansible.cfg
 #export JFROG_ACCESS_TOKEN=$(cat ${renan_vault}/jfrog-renan-token)
 #export ARTIFACTORY_API_KEY=$(cat ${renan_vault}/artifactory_api_key)
 
+# GRAFANA
+export GRAFANA_SERVER='https://grafana.hap-hub.prod.gcp.symrise.systems/'
+export GRAFANA_STACK_ID='1'
+export GRAFANA_TOKEN=$(cat ${renan_vault}/grafana-token)
+
 # GCP
 # -------------------------------------------------------
 #export USE_GKE_GCLOUD_AUTH_PLUGIN=True
