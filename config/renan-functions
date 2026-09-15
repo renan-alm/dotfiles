@@ -289,7 +289,7 @@ function demo(){
 }
 
 
-funtion wcode(){
+function wcode(){
   repo=$1
   dir="~/code/work/work/$repo"
   pwd=$(pwd)
