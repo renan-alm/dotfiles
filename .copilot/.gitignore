@@ -1,3 +1,7 @@
 **ide**
 **/jb*
 **/jb**
+./.copilot**
+/data.db*
+/run/
+/session-store.db*
