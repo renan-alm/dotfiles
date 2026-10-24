@@ -41,7 +41,7 @@ export GRAFANA_TOKEN=$(cat ${renan_vault}/grafana-token)
 
 # SOURCEGRAPH
 # -------------------------------------------------------
-#export SRC_ENDPOINT=
-#export SRC_ACCESS_TOKEN=
+export SRC_ENDPOINT=http://sourcegraph.localhost/
+export SRC_ACCESS_TOKEN=381dcd3d4b2a8f917e665faf108970c6c40c8fa9 # It is a local instance. No worries.
 
 #eval "$(jenv init -)"
