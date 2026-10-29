@@ -228,6 +228,17 @@ function load-ghapp(){
   echo 'Key has been copied to clipboard. Use echo $GHAPP_KEY to see the key'
 }
 
+function check-gcp-login(){
+  # There is no temp file to stat: ~/.config/gcloud/config_default and
+  # credentials.db survive an expired/revoked session. print-access-token is the
+  # only honest check - it refreshes if needed and fails if the login is gone.
+  # </dev/null so the check never swallows input when the caller is in a pipe.
+  if ! gcloud auth print-access-token </dev/null >/dev/null 2>&1; then
+    echo 'Not logged in to GCP. Run "console" first.' >&2
+    return 1
+  fi
+}
+
 function load-jfrog(){
   export JFROG_ACCESS_TOKEN=$(cat ~/.renan/jfrog_token)
   echo $JFROG_ACCESS_TOKEN | pbcopy
@@ -349,7 +360,7 @@ function setup-copilot(){
   ln -s /Users/ralmeida/code/_notes/dotfiles/.copilot ~/.copilot
 }
 
-function test-renovate(){
+function renovate-test(){
   repo=$1
   if [ -z "$repo" ]; then
     echo 'Usage: test-renovate <owner/repository>'
@@ -362,4 +373,26 @@ function test-renovate(){
   RENOVATE_PRINT_CONFIG=true \
   LOG_LEVEL=debug \
   npx --yes renovate "$repo"
+}
+
+function renovate-new-prs(){
+  logfile=$1
+  [ "$logfile" = "-" ] && logfile=""
+  if [ -z "$logfile" ] && [ -t 0 ]; then
+    echo 'Usage: renovate-new-prs <logfile>   e.g. renovate-new-prs /tmp/renovate.log'
+    echo '       <command> | renovate-new-prs [-]'
+    return 1
+  fi
+  if [ -n "$logfile" ] && [ ! -r "$logfile" ]; then
+    echo "Cannot read log file: $logfile"
+    return 1
+  fi
+  check-gcp-login || return 1
+
+  # Empty $logfile leaves jq with no file argument, so it reads stdin.
+  jq -r 'select(.msg | test("Creating PR|PR created|already exists"))
+       | [(.repository // "-"), (.branch // "-"), (.prTitle // "")] | @tsv' ${logfile:+"$logfile"} \
+  | grep -Ei 'action|workflow|github|targetRevision|/' \
+  | sort -u | column -t -s$'\t'
+
 }
