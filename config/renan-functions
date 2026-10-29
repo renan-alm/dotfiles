@@ -381,6 +381,9 @@ function renovate-new-prs(){
   if [ -z "$logfile" ] && [ -t 0 ]; then
     echo 'Usage: renovate-new-prs <logfile>   e.g. renovate-new-prs /tmp/renovate.log'
     echo '       <command> | renovate-new-prs [-]'
+    echo 'Furthermore:       <command> | renovate-new-prs [-]'
+    echo 'kgp -n app-renovate-bot --context=gke_prj-symr-p-harbour-wse3_europe-west3_harbour-platform'
+    echo 'k logs -f renovate-29887560-6cf4v -n app-renovate-bot --context=gke_prj-symr-p-harbour-wse3_europe-west3_harbour-platform | renovate-new-prs'
     return 1
   fi
   if [ -n "$logfile" ] && [ ! -r "$logfile" ]; then
