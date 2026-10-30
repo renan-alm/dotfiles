@@ -39,6 +39,7 @@ echo 'Loading env vars ...'
 source ~/code/_notes/dotfiles/config/renan-envvars    # My env vars
 echo 'Loading functions ...'
 source ~/code/_notes/dotfiles/config/renan-functions  # My bash functions
+source ~/code/_notes/dotfiles/config/gh-who  # ToDO: Refactor functions
 
 echo 'Loading plugins ...'
 plugins=(

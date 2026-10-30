@@ -1,0 +1,253 @@
+#!/usr/bin/env bash
+# gh-who — resolve GitHub handles <-> corporate emails, in either direction.
+#
+# Source of truth is the org's SAML identity provider (externalIdentities),
+# the same mapping .github/actions/remove-org-members/src/github.js uses:
+#   samlIdentity.nameId == email      user.login == handle
+#
+# Resolution order mirrors resolve-members.js matchInputs():
+#   1. exact login match (case-insensitive)      -> matchType "login"
+#   2. else email-prefix match on the candidates -> matchType "email-prefix"
+#      generated from the input, exactly as generateEmailPrefixCandidates()
+#      does: "Boris Torres Dumec" -> boris.torres.dumec, boris.torres-dumec,
+#      boris-torres.dumec, each tested with email.startsWith(candidate).
+#   A single hit is "email-prefix", several are "ambiguous", none is "none".
+#
+# Usage:
+#   gh-who name.surname                 # local-part -> handle
+#   gh-who name.surname@symrise.com     # full address -> handle
+#   gh-who octocat                      # handle -> email
+#   gh-who "Name Surname"               # display name -> handle + email
+#   gh-who a.b c.d octocat              # many inputs at once
+#   gh-who "a.b, c.d"                   # commas and newlines also separate
+#   gh-who -o OtherOrg -r name.surname  # other org, force cache refresh
+#   gh-who -j name.surname              # JSON output
+#
+# Exits non-zero if any input did not resolve to exactly one person.
+#
+# Requires: gh (authenticated, SSO-authorized for the org), jq.
+#
+# Portable between bash and zsh: no ${var,,} and no BASH_SOURCE in the body,
+# since this is sourced from .my_zshrc.
+
+# Overridable from the environment; set here only if unset or empty.
+: "${GH_WHO_ORG:=symriseag}"
+: "${GH_WHO_CACHE_TTL:=86400}" # seconds
+
+# Lowercases stdin. Avoids ${var,,}, which is a fatal error in zsh.
+_gh_who_lower() { tr '[:upper:]' '[:lower:]'; }
+
+# Fetches "login<TAB>email" for every SSO identity in the org, cached on disk.
+# Mirrors github.js listMembersWithSsoEmail(), including its error guidance.
+_gh_who_identities() {
+  local org="$1" refresh="$2"
+  # GitHub org logins are case-insensitive; normalise so casing variants
+  # share one cache file.
+  local key
+  key="$(printf '%s' "$org" | _gh_who_lower)"
+  local cache="${TMPDIR:-/tmp}/gh-who-${key}.tsv"
+
+  if [ "$refresh" != "1" ] && [ -s "$cache" ]; then
+    local age=$(( $(date +%s) - $(stat -c %Y "$cache" 2>/dev/null || echo 0) ))
+    if [ "$age" -lt "$GH_WHO_CACHE_TTL" ]; then
+      cat "$cache"
+      return 0
+    fi
+  fi
+
+  local tmp
+  tmp="$(mktemp "${cache}.XXXXXX")" || return 1
+  if ! gh api graphql --paginate -f org="$org" -f query='
+        query($org: String!, $endCursor: String) {
+          organization(login: $org) {
+            samlIdentityProvider {
+              externalIdentities(first: 100, after: $endCursor) {
+                pageInfo { hasNextPage endCursor }
+                nodes {
+                  samlIdentity { nameId }
+                  user { login }
+                }
+              }
+            }
+          }
+        }' \
+      --jq '.data.organization.samlIdentityProvider.externalIdentities.nodes[]
+            | select(.user.login != null)
+            | [.user.login, (.samlIdentity.nameId // "")]
+            | @tsv' >"$tmp" 2>"${tmp}.err"; then
+    echo "gh-who: SAML identity lookup failed for org '${org}'." >&2
+    echo "        Needs a token with admin:org (or read:org) that is SSO-authorized for '${org}'." >&2
+    echo "        gh auth refresh -h github.com -s admin:org, then authorize SSO for '${org}'." >&2
+    sed 's/^/        /' "${tmp}.err" >&2
+    rm -f "$tmp" "${tmp}.err"
+    return 1
+  fi
+  rm -f "${tmp}.err"
+
+  if [ ! -s "$tmp" ]; then
+    echo "gh-who: org '${org}' returned no SAML identities (SSO not enabled, or no access)." >&2
+    rm -f "$tmp"
+    return 1
+  fi
+
+  mv "$tmp" "$cache"
+  cat "$cache"
+}
+
+# Port of resolve-members.js generateEmailPrefixCandidates(): the email
+# local-part prefixes a name could map to, one per line.
+#   "name.surname"       -> name.surname
+#   "Boris Torres Dumec" -> boris.torres.dumec
+#                           boris.torres-dumec
+#                           boris-torres.dumec
+_gh_who_email_prefix_candidates() {
+  printf '%s\n' "$1" | _gh_who_lower | awk '
+    {
+      if (NF == 0) next
+      if (NF == 1) { print $1; next }
+      joined = $1
+      for (i = 2; i <= NF; i++) joined = joined "." $i
+      print joined
+      for (split_at = 1; split_at < NF; split_at++) {
+        first = $1
+        for (i = 2; i <= split_at; i++) first = first "-" $i
+        last = $(split_at + 1)
+        for (i = split_at + 2; i <= NF; i++) last = last "-" $i
+        print first "." last
+      }
+    }' | awk '!seen[$0]++'
+}
+
+_gh_who_usage() {
+  cat >&2 <<'EOF'
+usage: gh-who [-o ORG] [-r] [-j] [-h] <handle|email|local-part|"First Last">...
+  -o ORG  look up in ORG instead of $GH_WHO_ORG
+  -r      refresh the on-disk identity cache before resolving
+  -j      JSON output
+  -h      this help
+
+  gh-who name.surname                 # local-part -> handle
+  gh-who name.surname@symrise.com     # full address -> handle
+  gh-who octocat                      # handle -> email
+  gh-who "Name Surname"               # display name -> handle + email
+  gh-who a.b c.d octocat              # many inputs at once
+
+Resolution mirrors resolve-members.js: exact login first, then email-prefix
+candidates derived from the name. Exits non-zero unless every input resolved
+to exactly one person.
+EOF
+}
+
+gh-who() {
+  local org="${GH_WHO_ORG:-symriseag}" refresh=0 json=0 opt
+  OPTIND=1
+  while getopts ":o:rjh" opt; do
+    case "$opt" in
+      o) org="$OPTARG" ;;
+      r) refresh=1 ;;
+      j) json=1 ;;
+      h) _gh_who_usage; return 0 ;;
+      :) echo "gh-who: option -$OPTARG requires an argument" >&2; return 2 ;;
+      *) echo "gh-who: unknown option -$OPTARG" >&2; return 2 ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+
+  if [ "$#" -eq 0 ]; then
+    _gh_who_usage
+    return 2
+  fi
+
+  # Port of parseUsernames(): split on commas and newlines, trim, drop
+  # blanks, de-duplicate while preserving order.
+  local inputs=() item
+  while IFS= read -r item; do
+    inputs+=("$item")
+  done < <(printf '%s\n' "$@" | tr ',' '\n' |
+    awk '{ gsub(/^[[:space:]]+|[[:space:]]+$/, "") } $0 != "" && !seen[$0]++')
+
+  if [ "${#inputs[@]}" -eq 0 ]; then
+    _gh_who_usage
+    return 2
+  fi
+
+  local identities
+  identities="$(_gh_who_identities "$org" "$refresh")" || return 1
+
+  local results=() failed=0
+  local input lower candidates hits exact count match_type login email
+  for input in "${inputs[@]}"; do
+    lower="$(printf '%s' "$input" | _gh_who_lower)"
+
+    # 1. Exact login, the byLogin lookup in matchInputs().
+    hits="$(awk -F'\t' -v want="$lower" 'tolower($1) == want' <<<"$identities")"
+    if [ -n "$hits" ]; then
+      match_type="login"
+    else
+      # 2. email.startsWith(candidate), compared against the full address so
+      #    a pasted "name.surname@symrise.com" matches as-is.
+      candidates="$(_gh_who_email_prefix_candidates "$input")"
+      hits="$(awk -F'\t' -v plist="$candidates" '
+        BEGIN { n = split(plist, p, "\n") }
+        {
+          email = tolower($2)
+          for (i = 1; i <= n; i++)
+            if (p[i] != "" && index(email, p[i]) == 1) { print; next }
+        }' <<<"$identities")"
+
+      # Deliberate addition over matchInputs(): when one hit matches the
+      # local-part exactly, prefer it. Stops "name.surname" reporting
+      # ambiguous just because "name.surname2@" also starts with it.
+      if [ -n "$hits" ]; then
+        exact="$(awk -F'\t' -v plist="$candidates" '
+          BEGIN { n = split(plist, p, "\n") }
+          {
+            lp = tolower($2); sub(/@.*/, "", lp)
+            for (i = 1; i <= n; i++)
+              if (p[i] != "" && lp == p[i]) { print; next }
+          }' <<<"$hits")"
+        [ -n "$exact" ] && hits="$exact"
+      fi
+
+      count="$(grep -c . <<<"$hits")"
+      if [ -z "$hits" ]; then
+        match_type="none"
+      elif [ "$count" -gt 1 ]; then
+        match_type="ambiguous"
+      else
+        match_type="email-prefix"
+      fi
+    fi
+
+    case "$match_type" in
+      none)
+        failed=1
+        results+=("$(printf '%s\t%s\t\t' "$input" "$match_type")")
+        ;;
+      *)
+        [ "$match_type" = "ambiguous" ] && failed=1
+        while IFS=$'\t' read -r login email; do
+          [ -z "$login" ] && continue
+          results+=("$(printf '%s\t%s\t%s\t%s' "$input" "$match_type" "$login" "$email")")
+        done <<<"$hits"
+        ;;
+    esac
+  done
+
+  if [ "$json" -eq 1 ]; then
+    printf '%s\n' "${results[@]}" | jq -R -s 'split("\n")
+      | map(select(length > 0) | split("\t")
+      | {input: .[0], matchType: .[1], login: .[2], email: .[3]})'
+  else
+    { printf 'INPUT\tMATCH\tLOGIN\tEMAIL\n'
+      printf '%s\n' "${results[@]}"; } | column -t -s $'\t'
+  fi
+
+  return "$failed"
+}
+
+# Run directly when executed as a script; stay quiet when sourced from bash or
+# zsh. BASH_SOURCE is unset in zsh, so the -n guard short-circuits there.
+if [ -n "${BASH_SOURCE:-}" ] && [ "${BASH_SOURCE}" = "$0" ]; then
+  gh-who "$@"
+fi
