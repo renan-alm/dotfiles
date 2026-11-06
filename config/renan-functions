@@ -211,20 +211,29 @@ function clone-p(){
 
 # LOAD pwds
 # -------------------------------------------------------
+function _copy(){
+  # pbcopy only exists on macOS; fall back to pgcopydb where it is missing.
+  if command -v pbcopy >/dev/null 2>&1; then
+    pbcopy
+  else
+    pgcopydb
+  fi
+}
+
 function load-github(){
   export GITHUB_TOKEN=$(cat ~/.renan/github_token)
   export GH_TOKEN=$GITHUB_TOKEN
-  echo $GITHUB_TOKEN | pbcopy
+  echo $GITHUB_TOKEN | _copy
   echo 'Token has been copied to clipboard. Use echo $GITHUB_TOKEN to see the token'
 }
 function load-gitlab(){
   export GITLAB_TOKEN=$(cat ~/.renan/gitlab_token)
-  echo $GITLAB_TOKEN | pbcopy
+  echo $GITLAB_TOKEN | _copy
   echo 'Token has been copied to clipboard. Use echo $GITLAB_TOKEN to see the token'
 }
 function load-ghapp(){
   export GHAPP_KEY=$(cat ~/.renan/ghapp_key_file)
-  echo $GHAPP_KEY | pbcopy
+  echo $GHAPP_KEY | _copy
   echo 'Key has been copied to clipboard. Use echo $GHAPP_KEY to see the key'
 }
 
@@ -241,7 +250,7 @@ function check-gcp-login(){
 
 function load-jfrog(){
   export JFROG_ACCESS_TOKEN=$(cat ~/.renan/jfrog_token)
-  echo $JFROG_ACCESS_TOKEN | pbcopy
+  echo $JFROG_ACCESS_TOKEN | _copy
   echo 'Token has been copied to clipboard. Use echo $JFROG_ACCESS_TOKEN to see the token'
 }
 function load-sa(){
@@ -253,7 +262,7 @@ function load-sa(){
   fi
   temp=$(ls -d $service_account*|head -1)
   export GOOGLE_APPLICATION_CREDENTIALS=$(cat $temp)
-  echo $GOOGLE_APPLICATION_CREDENTIALS | pbcopy
+  echo $GOOGLE_APPLICATION_CREDENTIALS | _copy
   echo "> Loading SA keys for $temp"
   echo 'Key has been copied to clipboard. Use echo $GOOGLE_APPLICATION_CREDENTIALS to see the key'
   cd $pwd
