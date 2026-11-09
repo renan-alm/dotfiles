@@ -212,11 +212,17 @@ function clone-p(){
 # LOAD pwds
 # -------------------------------------------------------
 function _copy(){
-  # pbcopy only exists on macOS; fall back to pgcopydb where it is missing.
+  # pbcopy only exists on macOS; on WSL, clip.exe writes to the Windows clipboard.
+  # $(...) drops the trailing newline so pasted tokens carry no stray whitespace.
+  local payload
+  payload=$(cat)
   if command -v pbcopy >/dev/null 2>&1; then
-    pbcopy
+    printf '%s' "$payload" | pbcopy
+  elif command -v clip.exe >/dev/null 2>&1; then
+    printf '%s' "$payload" | clip.exe
   else
-    pgcopydb
+    echo 'No clipboard tool found (pbcopy, clip.exe).' >&2
+    return 1
   fi
 }
 
